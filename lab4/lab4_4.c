@@ -20,8 +20,6 @@ int main(void)
 
 	float *wynik = (float*)malloc(sizeof(float));
 	merge(arg_1, arg_2, wynik, size1, size2);
-
-	free(wynik);
 }
 
 void wypisz_f(float *tab, int size)
@@ -72,4 +70,5 @@ void merge(float *T1, float *T2, float *finalT, int size1, int size2)
         }
     }
 	printf("\nwynik: "); wypisz_f(finalT, size3);
+    free(finalT);
 }
