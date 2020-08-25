@@ -1,7 +1,7 @@
-### Programowanie Proceduralne 2020
+## Programowanie Proceduralne 2020
 Programy napisane na laby GK.
 
-###### Poprawnosc zadan
+### Poprawnosc zadan
 Do labow nr 9 wlacznie wszystkie programy byly sprawdzanez pomoca 
 programu valgrind. Sprawdz sam:
 ```
