@@ -1,5 +1,5 @@
-# Programowanie Proceduralne 2020
-Programy napisane na laby GK.
+# Programowanie Proceduralne
+Programy napisane na laby GK. Semestr 2, rok 2020.
 
 ## Poprawnosc zadan
 Do labow nr 9 wlacznie wszystkie programy byly sprawdzane z pomoca 
