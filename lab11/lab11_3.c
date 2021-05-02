@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 typedef struct xyz
@@ -7,7 +8,7 @@ typedef struct xyz
 	struct xyz *wskaznik;
 }xyz;
 
-xyz **dlaczego(FILE *bin);
+xyz *czytaj(FILE *bin);
 
 int main(void)
 {
@@ -30,15 +31,32 @@ int main(void)
 	fprintf(fin, "%c %p %c %p %c %p", a.znak, a.wskaznik, b.znak, b.wskaznik, c.znak, c.wskaznik);
 	fclose(fin);
 
-	FILE *bruh = fopen("dane.dat", "wb");
-	fwrite(&a, sizeof(xyz), 1, bruh);
-	fwrite(&b, sizeof(xyz), 1, bruh);
-	fwrite(&c, sizeof(xyz), 1, bruh);
-	fclose(bruh);
+	FILE *fbin = fopen("dane.dat", "wb");
+	fwrite(&a, sizeof(xyz), 1, fbin);
+	fwrite(&b, sizeof(xyz), 1, fbin);
+	fwrite(&c, sizeof(xyz), 1, fbin);
+	fclose(fbin);
 
+	fbin = fopen("dane.dat", "rb");
+	xyz *tab = czytaj(fbin);
+	fseek(fbin, 0, SEEK_END);
+	int size = ftell(fbin);
+
+	for(int i = 0; i < size/sizeof(xyz); i++)
+		printf("xyz: %c %p\n", tab[i].znak, tab[i].wskaznik);
+	free(tab);
+	fclose(fbin);
 }
 
-xyz **dlaczego(FILE *bin)
+xyz *czytaj(FILE *bin)
 {
+	fseek(bin, 0, SEEK_END);
 	int s = ftell(bin);
+	printf("rozmiar: %d\n", s);
+
+	rewind(bin);
+	xyz *tab = calloc(s/sizeof(xyz), sizeof(xyz));
+	fread(tab, sizeof(xyz), s/sizeof(xyz), bin);
+
+	return tab;
 }

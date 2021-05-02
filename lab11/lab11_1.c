@@ -189,7 +189,7 @@ void read_binfile(char *name)
 	printf("\n");
 	while(ile<(bytes/sizeof(double)))
 	{
-		if(ile==0)
+		if(ile%5==0)
 			fwrite(&temp, sizeof(double), 1, zero);
 		fseek(zero, 4*sizeof(double), SEEK_CUR);
 		fwrite(&temp, sizeof(double), 1, zero);

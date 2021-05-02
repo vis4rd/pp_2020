@@ -25,21 +25,22 @@ int main(int argc, char *argv[])
 		scanf("%d", &input);
 		if(input>20)
 			break;
-		if(input == 0)//mode 2
+		if(input == 0 && mode < 3)
 			mode = 2;
-		if(mode == 1)//mode 1
+
+		if(mode == 1)//mode 1 = dodawanie elementow do obu list
 		{
 			if(input%2==0)
 				dodaj_na_koniec(&L_1, input);
 			else if(input%2!=0)
 				dodaj_na_koniec(&L_2, input);
 		}
-		else if(mode == 2)
+		else if(mode == 2)//mode 2 = odpowiednie laczenie drugiej listy
 		{
-			dodaj_na_koniec(&L_1, input);
+			dodaj_na_koniec(&L_1, input);//dodawanie 0 do konca listy pierwszej
 			tnode *temp = L_1;
 			tnode *temp2 = L_2;
-			while(temp)
+			while(temp)//wypisywanie listy pierwszej
 			{
 				printf("(%d) ", temp->value);
 				if(temp->value == 0)
@@ -47,25 +48,49 @@ int main(int argc, char *argv[])
 				temp = temp->next;
 			}
 			printf("\n");
-			while(temp2->next)
+			while(temp2)//wypisywanie listy drugiej
 			{
 				printf("(%d) ", temp2->value);
+				if(temp2->next == NULL)
+					break;
 				temp2 = temp2->next;
 			}
-			temp2->next = temp;
+			printf("\n");
+			if(temp2)
+				temp2->next = temp;//linkujemy koniec listy drugiej do 0 z listy pierwszej
+			else
+				L_2 = temp;
 			mode = 3;
 		}
-		else if(mode == 3)
+		else if(mode == 3)//mode 3 = dodawanie elementow tylko do listy pierwszej
 			dodaj_na_koniec(&L_1, input);
 	}
 	printf("L_1:  ");wypisz_list(L_1);
 	printf("L_2:  ");wypisz_list(L_2);
 
-	if(wspolne)
+	if(wspolne(L_1, L_2))
 		printf("sa elementy wspolne\n");
 	else
 		printf("nie ma elementow wspolnych\n");
 
+	//odlaczenie L2 do zwolnienia pamieci
+	if(L_1 != NULL && L_2 != NULL)//jesli jest co odlaczac
+	{
+		tnode *temp = L_2;
+		if(temp->value == 0)
+			L_2 = NULL;
+		while(temp)
+		{
+			if(temp->next && temp->next->value == 0)
+			{
+				temp->next = NULL;
+				break;
+			}
+			temp = temp->next;
+		}
+	}
+	zwolnij(L_1);
+	zwolnij(L_2);
 }
 
 void dodaj_na_koniec(tnode **lista, char val)
@@ -130,13 +155,15 @@ void zwolnij(tnode *list)
 
 int wspolne(tnode *one, tnode *two)
 {
-	tnode *temp = two;
+	if(one == NULL || two == NULL)
+		return 0;
+	tnode *temp;
 	while(one)
 	{
-		two = temp;
-		while(two)
+		temp = two;
+		while(temp)
 		{
-			if(one->next==temp->next)
+			if(one==temp)
 				return 1;
 			temp = temp->next;
 		}

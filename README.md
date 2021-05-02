@@ -20,10 +20,9 @@ Lista sprawdzonych zadan (zaznaczone) i niesprawdzonych (puste):
 - [x] lab7
 - [x] lab8
 - [x] lab9
-- [x] lab10: zad2, zad4
-- [ ] lab10: zad1, zad3
-- [ ] lab11: wszystko
-- [ ] lab12: wszystko
-- [ ] lab13: wszystko
+- [x] lab10
+- [x] lab11
+- [x] lab12
+- [x] lab13
 - [ ] lab14: wszystko
 - [ ] lab15: wszystko

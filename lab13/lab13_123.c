@@ -19,7 +19,7 @@ tnode *usun(tnode **lista, char val);
 int main()
 {
 	tnode *head = NULL; //inicjalizacja listy pustej
-	printf("zad 1: ");
+	printf("zad 1: \n");
 	dodaj_na_poczatek(&head, 'i');
 	dodaj_na_poczatek(&head, 'u');
 	dodaj_na_poczatek(&head, 'd');
@@ -29,26 +29,44 @@ int main()
 	printf("po odwroceniu: ");
 	wypisz_list(head);
 	zwolnij(head);
-	free(head);
 
+	printf("\nzad 2: \n");
 	tnode *head2 = NULL;
 	dodaj_na_poczatek(&head2, 'z');
 	dodaj_na_poczatek(&head2, 'k');
 	dodaj_na_poczatek(&head2, 'j');
 	dodaj_na_poczatek(&head2, 'a');
-	printf("\nzad 2: ");
 	wypisz_list(head2);
 	dodaj_alfabetycznie(&head2, 'w');
 	printf("po dodaniu 'w': ");
 	wypisz_list(head2);
+	dodaj_alfabetycznie(&head2, 'a');
+	wypisz_list(head2);
+	dodaj_alfabetycznie(&head2, 'z');
+	wypisz_list(head2);
+	dodaj_alfabetycznie(&head2, 'c');
+	wypisz_list(head2);
+	zwolnij(head2);
 
-	printf("\nzad 3: ");
-	tnode *left = usun(&head, 'a');
+	printf("\nzad 3: \n");
+	tnode *head3 = NULL;
+	dodaj_na_poczatek(&head3, 'a');
+	dodaj_na_poczatek(&head3, 'a');
+	dodaj_na_poczatek(&head3, 'z');
+	dodaj_na_poczatek(&head3, 'A');
+	dodaj_na_poczatek(&head3, 'k');
+	dodaj_na_poczatek(&head3, 'a');
+	dodaj_na_poczatek(&head3, 'j');
+	dodaj_na_poczatek(&head3, 'a');
+	dodaj_na_poczatek(&head3, 'a');
+	wypisz_list(head3);
+	tnode *left = usun(&head3, 'a');
 	printf("\npo wyluskaniu elementow %c\n", 'a');
-	wypisz_list(head);
+	wypisz_list(head3);
 	wypisz_list(left);
 
 	zwolnij(left);
+	zwolnij(head3);
 }
   
 void dodaj_na_poczatek(tnode **list, char val)
@@ -142,87 +160,80 @@ void dodaj_alfabetycznie(tnode **lista, char val)
 		return;
 	}
 	wsk->value = val;
-	if (*lista == NULL)//jesli lista pusta
+
+	if(*lista == NULL)//jesli lista pusta
+	{
 		*lista = wsk;
+		wsk->next = NULL;
+	}
 	else
 	{
-		tnode *cur = *lista;
-		tnode *prev = cur;
-		while(val > cur->next->value)
-			cur = cur->next;
-		
-		prev = cur->next;
-		cur->next = wsk;
-		cur->next->next = prev;
+		tnode *iter = *lista;
+		if(wsk->value <= iter->value)
+		{
+			dodaj_na_poczatek(lista, val);
+			free(wsk);
+		}
+		else
+		{
+			while(iter->next != NULL)
+			{
+				if(wsk->value <= iter->next->value)
+					break;
+				iter = iter->next;
+			}
+			tnode *temp = iter->next;
+			iter->next = wsk;
+			wsk->next = temp;
+		}
 	}
 	return;
 }
 
 tnode *usun(tnode **lista, char val)
 {
-	tnode *save = *lista;
-	tnode *left = NULL;
-	if(*lista == NULL)
-	{
-		printf("tnode *usun() : Glowna lista jest pusta\n");
+	if(*lista == NULL)//lista jest pusta
 		return NULL;
-	}
 
-	tnode *temp = *lista;
-	while((*lista)->next)//PROBLEM Z DWIEMA LITERAMI POD RZAD
+	tnode *deleted = NULL;
+
+	tnode *iter = *lista;//iterator
+	tnode *hter = NULL;//element poprzedni
+	while(iter != NULL)
 	{
-		//printf("1\n");
-		//wypisz_list(save);
-		if(tolower((*lista)->value) == tolower(val)) //HEAD SIE PSUJE PO USUWANIU PIERWSZEGO ELEMENTU
+		if(toupper(val) == iter->value || tolower(val) == iter->value)//znaleziono wartosc
 		{
-			dodaj_na_koniec(&left, (*lista)->value);
-			tnode *bruh = *lista; 
-			if( bruh )
+			if(iter == *lista)//pierwszy element
 			{
-				*lista = bruh->next;
-				save = *lista;
-				free(bruh);
+				dodaj_na_poczatek(&deleted, iter->value);//dodajemy do listy usunietych wartosci
+				tnode *drugi = iter->next;
+				free(iter);
+				*lista = drugi;//drugi element staje sie pierwszym
+				iter = drugi;//ustawiamy iterator z powrotem (na pierwszy element) zeby kontynuowac 
+							 // sprawdzanie
+				continue;//jesli sa dwa elementy takie same na poczatku, to zeby przy inkrementacji
+						 // wskaznika iter nie pominac nowego pierwszego elementu, robimy continue
+
+				//warunek na istnienie elementu sprawdzany jest przed obiegiem nastepnej petli
+				// dlatego taki chwyt jest mozliwy
+
+				//ponadto iter i hter sa w razie czego dobrze ustawione, wiec nie jest wymagana
+				// zadna dodatkowa akcja
+
+				//biada tym co probuja to napisac z przepinaniem wskaznikow
+			}
+			else//inny element
+			{
+				dodaj_na_poczatek(&deleted, iter->value);
+				hter->next = iter->next;
+				free(iter);
+				iter = hter;//ustawiamy iterator z powrotem zeby kontynuowac sprawdzanie
 			}
 		}
-		else if(tolower((*lista)->next->value) == tolower(val))
-		{
-			dodaj_na_koniec(&left, (*lista)->next->value);
-			temp = (*lista)->next;
-			(*lista)->next = temp->next;
-			free(temp);
-			*lista = save;
-		}
-		(*lista) = (*lista)->next;
+		if(*lista == NULL)//jest mozliwosc, że pierwszy element byl ostatnim
+			break;
+		hter = iter;
+		iter = iter->next;
 	}
-	*lista = save;
-	return left;
+	return deleted;
 }
-
-//BUILD 4
-/*tnode *temp;
-while((*lista)->next)//PROBLEM Z DWIEMA LITERAMI POD RZAD
-{
-	//printf("1\n");
-	//wypisz_list(save);
-	if(tolower((*lista)->next->value) == tolower(val))
-	{
-		dodaj_na_koniec(&left, (*lista)->next->value);
-		tnode *temp = (*lista)->next;
-		//printf("temp = %c\n", temp->value);
-		(*lista)->next = temp->next;
-		printf("temp = %c , lista->next = %c\n", temp->value, (*lista)->next->value);
-		free(temp);
-	}
-	(*lista) = (*lista)->next;
-}*/
-
-//BUILD 7
-/*else if(tolower((*lista)->next->value) == tolower(val))
-		{
-			dodaj_na_koniec(&left, (*lista)->next->value);
-			temp = (*lista)->next;
-			(*lista)->next = temp->next;
-			free(temp);
-			*lista = save;
-		}
-		(*lista) = (*lista)->next;*/

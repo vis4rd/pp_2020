@@ -25,13 +25,12 @@ void va_cat(char **result, int num, ...)
 	int size_sum=0;
 	va_list pointer;
 	**result='\0';
-	int i=0;
 	char* temp;
 	va_start(pointer, num);
 	while(num)
 	{
 		temp = va_arg(pointer, char*);
-		size_word=strlen(temp);
+		size_word=strlen(temp)+1;
 		size_sum+=size_word;
 		*result = realloc(*result, size_sum*sizeof(char));
 		strcat(*result, temp);

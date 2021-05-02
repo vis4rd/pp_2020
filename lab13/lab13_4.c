@@ -26,9 +26,13 @@ int main(void)
 	dodaj_na_koniec(&lista_2, 'n');
 	dodaj_na_koniec(&lista_2, 'w');
 	printf("lista_1: "); wypisz_list(lista_1);
-	printf("\nlista_2: "); wypisz_list(lista_2);
+	printf("lista_2: "); wypisz_list(lista_2);
 	tnode *lista = cat_list(&lista_1, &lista_2);
-	printf("\nlista finalna: "); wypisz_list(lista);
+	printf("\n");
+	printf("lista finalna: "); wypisz_list(lista);
+	printf("lista_1: "); wypisz_list(lista_1);
+	printf("lista_2: "); wypisz_list(lista_2);
+	zwolnij(lista);
 }
 
 void dodaj_na_koniec(tnode **list, char var)
@@ -67,6 +71,7 @@ void wypisz_list(tnode *list)
 	 	printf("%c ", list->value);
 	 	list = list->next;
    	}
+   	printf("\n");
 	return;
 }
 
@@ -84,75 +89,60 @@ void zwolnij(tnode *list)
 
 tnode *cat_list(tnode **one, tnode **two)
 {
+	tnode *result = NULL;
+
 	if(*one==NULL&&*two==NULL)
 		return NULL;
 	else if(*one==NULL)
-		return *two;
+	{
+		result = *two;
+		*two = NULL;
+		return result;
+	}
 	else if(*two == NULL)
-		return *one;
-
-	tnode *result=NULL;
-	tnode *save = malloc(sizeof(tnode));
-	save = result;
-	tnode *save_1 = malloc(sizeof(tnode));
-	tnode *save_2 = malloc(sizeof(tnode));
-	save_1 = *one;
-	save_2 = *two;
-
-	if(result==NULL)
 	{
-		if((*one)->value > (*two)->value)
-		{
-			(*one)->next = result;
-			result = (*one);
-			printf("1(%c)\n", result->value);
-		}
-		else
-		{
-			(*two)->next = result;
-			result = (*two);
-			printf("2(%c)\n", result->value);
-		}
+		result = *one;
+		*one = NULL;
+		return result;
 	}
 
-	while(*one && *two)
-	{
-		if((*one)->value > (*two)->value)
-		{
-			printf("--(%c)\n", (*two)->value);
-			printf("---(%c)\n", result->value);
-			result->next = (*two);
-			(*two) = (*two)->next;
-		}
-		else
-		{
-			printf("++(%c)\n", (*one)->value);
-			result->next = (*one);
-			(*one) = (*one)->next;
-		}
-		result = result->next;
-	}
-	while(*one)
-	{
-		result->next = *one;
-		*one = (*one)->next;
-		result = result->next;
-	}
-	while(*two)
-	{
-		result->next = *two;
-		*two = (*two)->next;
-		result = result->next;
-	}
-	
+	tnode *ptr2 = *two; //iterator po two
+	tnode *r; //iterator po result
 
-	printf("\nfinished\n");
-	*one = save_1;
-	*two = save_2;
-	zwolnij(*one);
-	zwolnij(*two);
-	free(save_1); 
-	free(save_2);
-	result = save;
+	r = *one;
+	r->next = (*one)->next;
+	*one = NULL;
+	result = r;
+
+	//lista one przelaczona, teraz trzeba alfabetycznie dodac liste two
+	while(ptr2 != NULL)
+	{
+		r = result;
+		while(r != NULL)
+		{
+			if(r == result && r->value >= ptr2->value)//wstawianie przed pierwszy element w result
+			{
+				result = ptr2;
+				*two = ptr2->next;//drugi element two staje sie pierwszym
+				
+				result->next = r;
+				ptr2 = (*two);
+				break;
+			}
+			else if(r->next->value >= ptr2->value)//wstawianie gdzies w srodku (lub na koncu)
+			{
+				tnode *temp = r->next;//zapisujemy sobie element, przed ktory wstawimy ptr
+				r->next = ptr2;
+
+				*two = ptr2->next;//drugi element two staje sie pierwszym
+				ptr2->next = temp;//dolaczamy element temp za dodany element z two
+				ptr2 = *two;
+				break;
+			}
+			r = r->next;
+		}
+		if(*two == NULL)
+			break;
+	}
 	return result;
 }

@@ -31,6 +31,7 @@ int main(void)
 		fwrite(result, sizeof(Klient), size, fb);
 		fclose(fb);
 	}
+	free(result);
 
 	FILE *fbruh = fopen("dane.dat", "rb");
 	if(!fbruh)
@@ -40,19 +41,18 @@ int main(void)
 	}
 	else
 	{
-		Klient *temp;
+		Klient temp;
 		int cnt=0;
 		while(true)
 		{
-			if(fread(temp, sizeof(Klient), 1, fbruh)!=1)
+			if(fread(&temp, sizeof(Klient), 1, fbruh)!=1)
 				break;
 			cnt++;
-			if(temp->age>17)
-				printf("klient %d:\n  imie: %s\n  nazwisko: %s\n  kod: %s\n  wiek: %d\n\n", cnt, temp->f_name, temp->l_name, temp->code, temp->age);
+			if(temp.age > 17)
+				printf("klient %d:\n  imie: %s\n  nazwisko: %s\n  kod: %s\n  wiek: %d\n\n", cnt, temp.f_name, temp.l_name, temp.code, temp.age);
 		}
 	}
 	fclose(fbruh);
-
 }
 
 Klient *read(char *nazwa, int *rozmiar)
