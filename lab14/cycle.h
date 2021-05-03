@@ -12,10 +12,10 @@ typedef struct tnode
 
 void print_list(tnode *list);
 tnode *add_el(tnode *head, tnode *el);
-void del_el(tnode** head, int var);//invalid read gdy jedeny element do usuniecia
+void del_el(tnode** head, int var);
 tnode* add_list(tnode* head1, struct tnode* head2);
 tnode *div_list(tnode **original);
-void rev_list(tnode *head);/////zle odwraca
-void free_list(tnode**);////zle zwalnia
+void rev_list(tnode *head);
+void free_list(tnode**);
 
 #endif

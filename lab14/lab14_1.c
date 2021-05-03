@@ -9,7 +9,7 @@ int rand_int (int a, int b);
 
 int main(void)
 {
-	srand(998);
+	srand(time(NULL));
 	tnode *head = NULL;
 	tnode *head2 = NULL;
 
