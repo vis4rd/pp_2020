@@ -20,23 +20,37 @@ void free_list(tnode**);
 
 int main(void)
 {
-	tnode *list;
+	tnode *list = NULL;
 
 	tnode *new = malloc(sizeof(tnode));
-	new->value = 4;
+	new->value = 7;
 	list = add_first(list, new);
 
 	tnode *new2 = malloc(sizeof(tnode));
-	new->value = 3;
-	list = add_first(list, new);
+	new2->value = 3;
+	list = add_first(list, new2);
 
 	tnode *new3 = malloc(sizeof(tnode));
-	new->value = 9;
-	list = add_last(list, new);
+	new3->value = 9;
+	list = add_last(list, new3);
+
+	print_list(list);
+
+	tnode *deleted = del_el(&list, 9);
+	print_list(deleted);
+	free(deleted);
+
+	print_list(list);
 
 	tnode *new4 = malloc(sizeof(tnode));
-	new->value = 5;
-	add_sort(&list, new);
+	new4->value = 4;
+	add_sort(&list, new4);
+
+	new4 = malloc(sizeof(tnode)); new4->value = 8; add_sort(&list, new4);
+	new4 = malloc(sizeof(tnode)); new4->value = 1; add_sort(&list, new4);
+	new4 = malloc(sizeof(tnode)); new4->value = 0; add_sort(&list, new4);
+	new4 = malloc(sizeof(tnode)); new4->value = 3; add_sort(&list, new4);
+	new4 = malloc(sizeof(tnode)); new4->value = 5; add_sort(&list, new4);
 
 	print_list(list);
 
@@ -44,131 +58,189 @@ int main(void)
 	print_list(list);
 	print_list(even);
 
+	printf("\nsortowanie parzystych: ");
+	sort(&even);
+	print_list(even);
+
+	tnode *iter = even;
+	tnode *next = iter->next;
+	while(iter != NULL)
+	{
+		list = add_first(list, iter);
+		if(next == NULL)
+			break;
+		iter = next;
+		next = iter->next;
+	}
+	printf("\npolaczenie list: ");
+	print_list(list);
+
+	printf("\nsortowanie calej listy: ");
+	sort(&list);
+	print_list(list);
+
 	free_list(&list);
-	free_list(&even);
 }
 
 void print_list(tnode *list)
 {
-    if(!list)
-    {
-    	printf("print_list(): Lista jest pusta\n");
-    	return;
-    }
+	if(list==NULL)
+	{
+		printf("print_list(): lista jest pusta\n");
+		return;
+	}
 
-    tnode *temp = list;
-    while(temp->next)
-    {
-        printf("address: %p, value: %d, previous: %p, next: %p\n", temp, temp->value, temp->prev, temp->next);
-        temp = temp->next;
-    }
-    printf("\n");
-    return;
+	tnode *wsk = list;
+	do
+	{
+		printf("%d ", wsk->value);
+		wsk = wsk->next;
+	}while(wsk != NULL);
+	printf("\n");
+	return;
 }
 
 tnode *add_first(tnode* head, tnode* el)
 {
-	el->next = head;
-	el->prev = NULL;
-
-	if(head!=NULL)
+	if(head != NULL)
+	{
+		el->next = head;
+		el->prev = NULL;
 		head->prev = el;
-
-	head = el;
-	return head;
+		return el; //zwracany jest nowy pierwszy element
+	}
+	else //lista jest pusta
+	{
+		el->next = NULL;
+		el->prev = NULL;
+		return el;
+	}
+	
 }
 
 tnode* add_last(tnode* head, tnode* el)
 {
-	tnode *temp = head;
 	el->next = NULL;
+	
+	tnode *iter = head;
+	while(iter->next != NULL)//szukamy ostatniego elementu
+		iter = iter->next;
 
-	if(head == NULL)
-	{
-		el->prev = NULL;
-		head = el;
-		return head;
-	}
-	while(temp->next != NULL)
-		temp = temp->next;
-
-	temp->next = el;
-	el->prev = temp;
+	iter->next = el;
+	el->prev = iter;
 	return head;
 }
 
 tnode* del_el(tnode** head, int var)
 {
-	tnode *temp = *head;
-	while(temp->next)
+	tnode *iter = *head;
+	while(iter != NULL)
 	{
-		if(temp->value == var)
-			break;
-		temp = temp->next;
+		if(iter->value == var)//znaleziono element
+		{
+			if(iter->prev == NULL)//jest to pierwszy element
+			{
+				if(iter->next == NULL && iter->prev == NULL)//jest to jedyny element
+				{
+					*head = NULL;
+					return iter;
+				}
+				else
+				{
+					*head = iter->next;//poczatek listy przesuwamy o jeden
+					iter->next->prev = NULL;//rozlaczamy wskazniki
+				}
+			}
+			else if(iter->next == NULL)//jest to ostatni element
+			{
+				iter->prev->next = NULL;//rozlaczamy wskazniki
+			}
+			else//jest to element w srodku
+			{
+				iter->prev->next = iter->next;//laczymy poprzedni element z nastepnym
+				iter->next->prev = iter->prev;//laczymy nastepny element z poprzednim
+			}
+			iter->next = NULL;//rozlaczamy niepotrzebne wskazniki
+			iter->prev = NULL;
+			return iter;
+		}
+		iter = iter->next;
 	}
-	tnode *tail = temp->prev;
-	tnode *nose = temp->next;
-	tail->next = nose;
-	nose->prev = tail;
-	temp->next = NULL;
-	temp->prev = NULL;
-	return temp;
+	return NULL;
 }
 
 void add_sort(tnode** head, tnode* el)
 {
-	if(NULL == *head)
-		*head = el;
-
-	if((*head)->value >= el->value)
+	if(NULL == *head) //lista jest pusta
 	{
-		el->next = *head;
-		el->next->prev = el;
+		el->next = NULL;
+		el->prev = NULL;
 		*head = el;
 	}
-
-	if((*head)->value < el->value)
+	else
 	{
-		tnode *temp;
-		temp = *head;
-
-		while(temp->next)
+		tnode *iter = *head;
+		while(1)
 		{
-			if(temp->next->value < el->value)
+			if(el->value < iter->value)//znaleziono miejsce przed koncem
+			{
+				if(iter->prev == NULL)//wstawiamy przed pierwszy element
+				{
+					el->prev = NULL;
+					el->next = *head;
+					iter->prev = el;
+					*head = el;
+				}
+				else /*if(iter->next == NULL)//wstawiamy przed ostatni element*/
+				{
+					el->prev = iter->prev;
+					el->next = iter;
+					iter->prev->next = el;
+					iter->prev = el;
+				}
+				return;
+			}
+			if(iter->next != NULL)
+				iter = iter->next;
+			else
 				break;
-			temp = temp->next;
 		}
-
-		el->next = temp->next;
-		if(temp->next)
-			el->next->prev = el;
-
-		temp->next = el;
-		el->prev = temp;
+		//wyjscie z petli oznacza, ze nie znaleziono wiekszego elementu, wiec dodajemy na koniec
+		iter->next = el;
+		el->prev = iter;
+		el->next = NULL;
 	}
-	return;
 }
 
 tnode* div_list(tnode** head)
 {
-	tnode *even = malloc(sizeof(tnode));
-	even->prev = NULL;
-	even->next = NULL;
-	tnode *temp = *head;
-	while(1)
+	tnode *parzyste = NULL; //ta lista bedzie zwracana
+
+	tnode *iter = *head;
+	tnode *next; //del_el() rozlacza wszystkie wskazniki, wiec potrzebny jest nastepny element
+	while(iter != NULL)
 	{
-		if(NULL==temp)
-			break;
-		if((temp->value)%2==0)
-			add_first(even, del_el(head, temp->value));
-		temp = temp->next;
+		next = iter->next;
+		if(iter->value%2 == 0)
+			parzyste = add_first(parzyste, del_el(head, iter->value));
+		iter = next;
 	}
-	return even;
+	return parzyste;
 }
 
 void sort(tnode** head)
 {
-
+	tnode *parzyste = div_list(head);
+	tnode *iter = parzyste;
+	tnode *next = iter->next;
+	while(iter->next != NULL)
+	{
+		add_sort(head, iter);
+		iter = next;
+		next = iter->next;
+	}
+	add_sort(head, iter);
+	//z zalozenia nie dziala to jak powinno, ale "we will get them next time!"
 }
 
 void free_list(tnode **head)
@@ -178,12 +250,15 @@ void free_list(tnode **head)
 		printf("void free_list(): lista jest juz pusta\n");
 		return;
 	}
-	tnode *del = NULL;
-	do
-    {
-        del=(*head)->next;
-        free(*head);
-        (*head)=del;
-    }while(*head);
+
+	tnode *temp = *head;
+	while(temp->next != NULL)
+	{
+		temp = (*head)->next;
+		free(*head);
+		*head = temp;
+	}
+	free(*head);
+	*head = NULL;
     return;
 }

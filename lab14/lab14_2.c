@@ -36,48 +36,80 @@ void dodaj_na_poczatek(tnode **list, char *val)
 		printf("error1\n");
 		return;
 	}
-	strcpy(wsk->string, val);
 	wsk->count = 1;
-	wsk->next = *list;
+	strcpy(wsk->string, val);
+
+	if(*list == NULL)//pusta lista
+	{
+		wsk->next = NULL;
+	}
+	else
+	{
+		wsk->next = *list;
+	}
 	*list = wsk;
 	return;
 }
 
 void dodaj_slowo(tnode **lista, char *val)
 {
-	if (NULL == *lista)
+	if (NULL == *lista) //lista jest pusta
 	{
 		dodaj_na_poczatek(lista, val);
 		return;
 	}
-	else
+	else //lista ma elementy
 	{
-		tnode *clone = *lista;
-		while(clone)
+		tnode *iter = *lista;
+		while(iter)
 		{
-			if(strcmp((char *)clone->string, val)==0)
+			if(strcmp((char *)iter->string, val)==0)//jesli na liscie jest juz taki element
 			{
-				(clone->count)++;
+				(iter->count)++;
 				return;
 			}
-			clone = clone->next;
+			iter = iter->next;
 		}
-	}
+		//wyjscie z petli oznacza, ze nie znaleziono takiego samego elementu
 
-	tnode *wsk = malloc(sizeof(tnode));
-	strcpy(wsk->string, val);
-	wsk->count = 1;
-	tnode *cur = *lista;
-	tnode *prev = cur;
-	while(cur)
-	{
-		if(strcmp(val, cur->string)>0) //cos tu pokrecilem z sortowaniem ale brak czasu na rozwiazanie:/
-			break;
-		cur = cur->next;
+		iter = *lista;
+		tnode *prev = *lista;
+		while(iter != NULL)
+		{
+			if(strcmp(val, (char *)iter->string) <= 0)//przed tym elementem trzeba wstawic nowy
+			{
+				if(iter == *lista)//jesli wstawic przed pierwszy element
+				{
+					tnode *el = malloc(sizeof(tnode));//tworzymy element
+					strcpy(el->string, val);
+					el->count = 1;//wypelniamy dane
+
+					el->next = iter;
+					*lista = el;
+				}
+				else
+				{
+					tnode *el = malloc(sizeof(tnode));//tworzymy element
+					strcpy(el->string, val);
+					el->count = 1;//wypelniamy dane
+
+					prev->next = el;//za poprzednim wstawiamy nowy
+					el->next = iter;//nowy element wskazuje na obecny
+				}
+				return;
+			}
+			else
+			prev = iter;
+			iter = iter->next;
+		}
+		//nie znaleziono elementu wiekszego od szukanego, wiec nowy element bedzie ostatnim
+		tnode *el = malloc(sizeof(tnode));//tworzymy element
+		strcpy(el->string, val);
+		el->count = 1;//wypelniamy dane
+
+		prev->next = el;
+		el->next = NULL;
 	}
-	prev = cur->next;
-	cur->next = wsk;
-	cur->next->next = prev;
 	return;
 }
 

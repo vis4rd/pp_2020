@@ -41,37 +41,52 @@ tnode *add_el(tnode *head, tnode *el)
 
 void del_el(struct tnode** head, int var)/////////////////////
 {
-	if((*head) == NULL)
-	{
-		printf("void del_el(): lista jest pusta\n");
-		return;
-	}
-	tnode *temp = (*head);
-	tnode *prev = NULL;
-	while(temp->next!=(*head))
-	{
-		prev = temp->next;
-		if(temp->value == var)
-		{
-			free(temp);
-			temp = prev;
-		}
-		temp = temp->next;
-	}
+	//pierwszy element jest sprawdzany na koncu
+    if (*head == NULL)
+    {
+        printf("void del_el(): lista jest pusta\n");
+        return;
+    }
 
-	if((*head)->value == var)
-	{
-		tnode *last = *head;
-		while(last->next!=(*head))
-			last = last->next;
-		prev = (*head)->next;
-		free(*head);
-		(*head) = prev;
-		last->next = (*head);
-	}
+    tnode *cur = *head;
+    tnode *prev = cur;
+    int count = 0;//dlugosc listy
+    while (prev->next != *head) 
+    {
+        prev = prev->next;
+        count++;
+    }
+
+    int i = 0;//aktualny element
+    while (i <= count)
+    {
+        if (cur->value == var)//znaleziono element
+        {
+            if (cur->next != cur)//jesli lista ma wiecej niz jeden element
+                prev->next = cur->next;//poprzedni element wskazuje na nastepny
+            else
+                prev->next = NULL;//lista ma jeden element, ktory zostanie usuniety
+
+            if (cur == *head)//jesli znaleziono pierwszy element
+                *head = prev->next;//head ustawiamy na nastepny element
+
+            free(cur);//usuwamy aktualny element
+
+            if (prev != NULL && prev->next != NULL)//jesli po usunieciu istnieje jakis element
+                cur = prev->next;//aktualny element ustawiamy na poczatek
+            else
+                cur = NULL;
+        }
+        else 
+        {
+            prev = cur;
+        	cur  = cur->next;
+        }
+        i++;
+    }
 }
 
-tnode* add_list(struct tnode* head1, struct tnode* head2)
+tnode* add_list(tnode* head1, tnode* head2)
 {
 	if(head1 == NULL && NULL == head2)
 	{
@@ -88,17 +103,18 @@ tnode* add_list(struct tnode* head1, struct tnode* head2)
 		printf("tnode *add_list(): lista 2 jest pusta\n");
 		return head1;
 	}
-	tnode *start = head1;
-	tnode *start2 = head2;
 
-	while(head1->next!=start)
-		head1 = head1->next;
-	head1->next = head2;
-	head1=start;
+	tnode *last1 = head1;
+	while(last1->next != head1)
+		last1 = last1->next;
 
-	while(head2->next!=start2)
-		head2 = head2->next;
-	head2->next = start;
+	last1->next = head2; //ostatni element listy pierwszej wskazuje na pierwszy listy drugiej
+
+	tnode *last2 = head2;
+	while(last2->next != head2)
+		last2 = last2->next;
+
+	last2->next = head1; //ostatni element listy drugiej wskazuje na pierwszy listy pierwszej
 	return head1;
 }
 
@@ -109,42 +125,80 @@ tnode *div_list(tnode **original)
 		printf("void div_list(): lista jest pusta\n");
 		return NULL;
 	}
-	tnode *start = (*original);
-	tnode *parzyste = NULL;
-	while((*original)->next!=NULL)
+
+	tnode *parzyste = NULL; //ta lista zostanie zwrocona w return
+	tnode *evenlast = NULL; //ostatni element parzystej listy
+
+	tnode *last = *original; //szukamy ostatniego elementu zeby tymczasowo rozlaczyc cykl
+	while(last->next != (*original))
+		last = last->next;
+	last->next = NULL;
+
+	tnode *iter = *original;
+	tnode *prev = last;
+	while(iter != NULL)
 	{
-		if((*original)->value%2 == 0)
+
+		if(iter->value%2 == 0) //znaleziono parzysty element
 		{
-			tnode *new = malloc(sizeof(tnode));
-			new->value = (*original)->value;
-			parzyste = add_el(parzyste, new);
+			prev->next = iter->next;
+			if(parzyste == NULL) //pierwszy parzysty element
+			{
+				parzyste = iter;
+				parzyste->next = parzyste;
+				evenlast = parzyste;
+			}
+			else
+			{
+				evenlast->next = iter;
+				iter->next = parzyste;
+				evenlast = iter;
+			}
+			iter = prev;
 		}
+		prev = iter;
+		iter = iter->next;
 	}
-	(*original) = start;
+
+	last = *original;
+	while(last->next != NULL)//ponownie szuakmy ostatniego elementu, aby polaczyc w cykl
+		last = last->next;
+	last->next = *original;
+
 	return parzyste;
 }
 
-void rev_list(tnode *list)
+void rev_list(tnode *head)
 {
-	if(list == NULL)
+	if(head == NULL)
 	{
 		printf("void rev_list(): lista jest pusta\n");
 		return;
 	}
-	tnode *start = list;
-	tnode *prev = NULL;
-	tnode *cur = list;
-	tnode *nast = NULL;
-	while(nast != start)
+	if(head->next == head) //lista jest jednoelementowa
+		return;
+	
+	tnode *last = head;
+	while(last->next != head)
+		last = last->next;
+	last->next = head; //ustawiamy ostatni element w liscie
+
+	tnode *next = last->next;
+	while(head->next != last)
 	{
-		nast = cur->next;
-		cur->next = prev;
-		prev = cur;
-		cur = nast;
+		head->next = last;
+		last = head;
+		head = next;
+		next = head->next;
 	}
-	list = prev;
-	start->next = list;
-	return;
+
+	//head = last;
+	//Powyzsza linia jest zakomentowana, poniewaz ma sens tylko jesli przekazujemy
+	// do tej procedury wskaznik przez referencje (oryginalny).
+	//
+	//Z "tnode *head" jako argument funkcji nie da sie przesunac poczatku listy na
+	// ostatni element, zeby przy wypisywaniu dobrze sie wyswietlalo.
+	//Zeby zadzialalo to jak trzeba, wymagany jest argument "tnode **head".
 }
 
 void free_list(tnode **head)
@@ -154,12 +208,15 @@ void free_list(tnode **head)
 		printf("void free_list(): lista jest juz pusta\n");
 		return;
 	}
-	tnode *del = NULL;
-	do
+
+	tnode* temp = (*head)->next;
+	(*head)->next = NULL;
+	(*head) = temp;
+    while(temp != NULL)
     {
-        del=(*head)->next;
+        temp = (*head)->next;
         free(*head);
-        (*head)=del;
-    }while(*head);
+        (*head) = temp;
+    }
     return;
 }
